@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import API from "../../api/axiosInstance"; // Using your custom instance
+import { loginApi } from "../../services/auth.api";
+import { registerApi } from "../../services/auth.api";
 
 interface AuthState {
   token: string | null;
@@ -18,8 +19,7 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (data: { email: string; password: string }, { rejectWithValue }) => {
     try {
-      // Points to http://localhost:5000/api/auth/login
-      const res = await API.post("/auth/login", data);
+      const res = await loginApi(data);
       return res.data;
     } catch (err: any) {
       // Captures the error message from your Express error handler
@@ -33,8 +33,7 @@ export const registerUser = createAsyncThunk(
   "auth/register",
   async (data: { name: string; email: string; password: string }, { rejectWithValue }) => {
     try {
-      // Points to http://localhost:5000/api/auth/register
-      const res = await API.post("/auth/register", data);
+      const res = await registerApi(data);
       return res.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || "Registration failed");
@@ -49,6 +48,9 @@ const authSlice = createSlice({
     logout: (state) => {
       state.token = null;
       localStorage.removeItem("token");
+    },
+    clearError: (state) => {
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -71,5 +73,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, clearError } = authSlice.actions;
 export default authSlice.reducer;
