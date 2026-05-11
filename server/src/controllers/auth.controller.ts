@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import User from "../models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import asyncHandler from "../middleware/asynchandler";
+import asyncHandler from "../middleware/asyncHandler";
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
@@ -25,7 +25,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
-
+   
   const user = await User.findOne({ email });
 
   // If user doesn't exist, set status and throw

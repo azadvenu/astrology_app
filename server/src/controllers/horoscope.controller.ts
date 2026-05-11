@@ -2,7 +2,7 @@
 import { Response } from "express";
 import { AuthRequest } from "../middleware/auth";
 import Horoscope from "../models/Horoscope";
-import asyncHandler from "../middleware/asynchandler";
+import asyncHandler from "../middleware/asyncHandler";
 
 export const generateHoroscope = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { name, dob, tob, place } = req.body;

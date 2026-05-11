@@ -1,139 +1,151 @@
 import React, { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { loginUser, clearError } from "../features/auth/authSlice";
-import { useNavigate, Link } from "react-router-dom";
-import bgimage from "../assets/bgimage.avif";
+import { loginUser, registerUser, clearError } from "../features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff, AlertCircle } from "lucide-react"; // Added AlertCircle
+import heroImage from "../assets/hero-vedic.jpg";
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  
+  const [isRegister, setIsRegister] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { loading, error, token } = useAppSelector((state) => state.auth);
 
-  // Redirect if already logged in
   useEffect(() => {
-    if (token) {
-      navigate("/dashboard");
-    }
-    // Cleanup error message when leaving the page
-    return () => { dispatch(clearError()); };
+    if (token) navigate("/dashboard");
   }, [token, navigate, dispatch]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Clear error message when switching modes
+  useEffect(() => {
+    if (error) {
+      dispatch(clearError());
+    }
+  }, [isRegister, dispatch]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }));
+
+    if (isRegister) {
+      // We use .unwrap() to catch errors locally in the component
+      try {
+        await dispatch(registerUser(formData)).unwrap();
+        alert("Please check your email to verify your account.");
+        setIsRegister(false); // Only switches if success!
+      } catch (err) {
+        // The error is now in Redux, and we DID NOT change isRegister,
+        // so the useEffect won't clear it.
+      }
+    } else {
+      dispatch(loginUser({ email: formData.email, password: formData.password }));
+    }
   };
 
-return (
-  /* Container with Background Image */
-  <div 
-    className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat px-4 relative"
-    style={{ 
-      backgroundImage: `url(${bgimage})` 
-    }}
-  >
-    {/* Dark Overlay to make the card pop */}
-    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-    
-    {/* Form Card - Increased max-width and padding */}
-    <div className="relative w-full max-w-lg bg-white/95 rounded-[2rem] shadow-2xl border border-white/20 overflow-hidden backdrop-blur-md">
-      
-      {/* Header - Astrology Portal Style */}
-      <div className="pt-4 pb-6 flex flex-col items-center justify-center">
-        <div className="flex items-center gap-3 mb-4">
-           {/* Sun Icon */}
-           <span className="text-3xl">☀️</span>
-           <h1 className="text-4xl font-bold text-[#c67605] tracking-tight">
-             Astrology Portal
-           </h1>
-           {/* Moon Icon */}
-           <span className="text-3xl">🌙</span>
-        </div>
-        {/* Large Central Star */}
-        <div className="text-5xl animate-pulse">⭐</div>
-      </div>
+  const handleInputChange = (field: string, value: string) => {
+    if (error) {
+      dispatch(clearError())
+    }
+    setFormData({ ...formData, [field]: value })
+  }
 
-      {/* Body Section */}
-      <div className="px-10 pb-10">
+  // Only clear errors when the user MANUALLY toggles the form mode
+  const toggleMode = () => {
+    setIsRegister(!isRegister);
+    dispatch(clearError());
+  };
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat px-4 relative"
+      style={{ backgroundImage: `url(${heroImage})` }}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+      <div className="relative w-full max-w-lg bg-[#fdfaf5]/95 rounded-[2.5rem] shadow-2xl border border-white/20 overflow-hidden backdrop-blur-md p-10">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-serif font-bold text-[#5c4033] tracking-tight">
+            {isRegister ? "Join Astra" : "Welcome Back"}
+          </h1>
+          <p className="text-[#c67605] italic mt-2">Discover your cosmic journey</p>
+        </div>
+
+        {/* --- ERROR MESSAGE START --- */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-200">
-            {error}
+          <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <AlertCircle className="text-red-500 w-5 h-5 flex-shrink-0" />
+            <p className="text-sm font-semibold text-red-700">{error}</p>
           </div>
         )}
+        {/* --- ERROR MESSAGE END --- */}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          
-          {/* Email */}
-          <div className="space-y-2">
-            <label className="text-lg font-medium text-slate-700 block">
-              Email ID
-            </label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* ... (Keep your existing Name/Email inputs) ... */}
+
+          {isRegister && (
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-slate-700 ml-2">Full Name</label>
+              <input
+                type="text"
+                required
+                placeholder="name"
+                className="w-full px-5 py-3 rounded-2xl border border-yellow-200 outline-none focus:ring-2 focus:ring-[#c67605] bg-white/50"
+                onChange={(e) => handleInputChange('name', e.target.value)}
+              />
+            </div>
+          )}
+
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-slate-700 ml-2">Email ID</label>
             <input
               type="email"
               required
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-5 py-4 rounded-2xl border border-yellow-200 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition text-lg bg-white"
+              placeholder="name@email.com"
+              className="w-full px-5 py-3 rounded-2xl border border-yellow-200 outline-none focus:ring-2 focus:ring-[#c67605] bg-white/50"
+              onChange={(e) => handleInputChange('email', e.target.value)}
             />
           </div>
 
-          {/* Password */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-lg font-medium text-slate-700">
-                Password
-              </label>
-            </div>
-            <input
-              type="password"
-              required
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 rounded-2xl border border-yellow-200 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition text-lg bg-white"
-            />
-            <div className="text-right">
-              <Link
-                to="/forgot-password"
-                className="text-md font-semibold text-[#c67605] hover:underline"
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-slate-700 ml-2">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                placeholder="Password"
+                value={formData.password}
+                className="w-full px-5 py-3 rounded-2xl border border-yellow-200 outline-none focus:ring-2 focus:ring-[#c67605] bg-white/50 pr-12"
+                onChange={(e) => handleInputChange('password', e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#c67605]"
               >
-                Forgot Password?
-              </Link>
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
           </div>
 
-          {/* Sign In Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#f29f05] hover:bg-[#e09304] text-white py-4 rounded-[2rem] text-xl font-bold transition-all transform hover:scale-[1.01] active:scale-[0.98] shadow-lg disabled:bg-gray-300 mt-4"
-          >
-            {loading ? "Signing in..." : "Sign In"}
+          <button type="submit" disabled={loading} className="w-full bg-[#5c4033] hover:bg-[#3e2b22] text-white py-4 rounded-full text-lg font-bold transition-all shadow-lg mt-4 disabled:opacity-70">
+            {loading ? "Processing..." : isRegister ? "Create Account" : "Sign In"}
           </button>
         </form>
-        
-        {/* Footer */}
-        <div className="mt-8 text-center space-y-6">
-          <p className="text-lg text-slate-600">
-            Don't have an account?{" "}
-            <Link
-              to="/register"
-              className="text-[#c67605] font-bold hover:underline"
-            >
-              Create Account
-            </Link>
-          </p>
-          <div className="border-t border-gray-100 pt-6">
-             <p className="text-slate-400 italic">Discover your cosmic journey</p>
-          </div>
+
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={toggleMode}
+            className="text-[#c67605] font-bold hover:underline"
+          >
+            {isRegister ? "Already have an account? Login" : "Don't have an account? Register"}
+          </button>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default Login;

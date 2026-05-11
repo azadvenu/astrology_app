@@ -23,6 +23,7 @@ export const loginUser = createAsyncThunk(
       return res.data;
     } catch (err: any) {
       // Captures the error message from your Express error handler
+      console.error("Login error:", err.response?.data);
       return rejectWithValue(err.response?.data?.message || "Login failed");
     }
   }
@@ -57,7 +58,7 @@ const authSlice = createSlice({
     builder
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
-        state.error = null;
+        // state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
@@ -66,6 +67,7 @@ const authSlice = createSlice({
         localStorage.setItem("token", action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
+        console.log("REDUX CAUGHT ERROR:", action.payload);
         state.loading = false;
         // Sets the error to the message returned by rejectWithValue
         state.error = action.payload as string;
