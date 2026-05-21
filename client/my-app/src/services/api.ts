@@ -20,8 +20,16 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      console.log("Unauthorized - logging out");
+    const status = error.response?.status;
+    const url = error.config?.url;
+
+    // Ignore login/register 401 errors
+    const isAuthPage =
+      url?.includes("/auth/login") ||
+      url?.includes("/auth/register");
+
+    if (status === 401 && !isAuthPage) {
+      console.log("Session expired - logging out");
 
       localStorage.removeItem("token");
       window.location.href = "/login";

@@ -22,12 +22,6 @@ const Login: React.FC = () => {
     if (token) navigate("/dashboard");
   }, [token, navigate, dispatch]);
 
-  // Clear error message when switching modes
-  useEffect(() => {
-    if (error) {
-      dispatch(clearError());
-    }
-  }, [isRegister, dispatch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,19 +45,25 @@ const Login: React.FC = () => {
     if (error) {
       dispatch(clearError())
     }
-    setFormData({ ...formData, [field]: value })
+    setFormData((prev) => ({ ...prev, [field]: value }));
   }
 
   // Only clear errors when the user MANUALLY toggles the form mode
   const toggleMode = () => {
     setIsRegister(!isRegister);
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+    });
+
     dispatch(clearError());
+    setShowPassword(false);
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat px-4 relative"
       style={{ backgroundImage: `url(${heroImage})` }}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-
       <div className="relative w-full max-w-lg bg-[#fdfaf5]/95 rounded-[2.5rem] shadow-2xl border border-white/20 overflow-hidden backdrop-blur-md p-10">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-serif font-bold text-[#5c4033] tracking-tight">
@@ -91,6 +91,7 @@ const Login: React.FC = () => {
                 type="text"
                 required
                 placeholder="name"
+                value={formData.name}
                 className="w-full px-5 py-3 rounded-2xl border border-yellow-200 outline-none focus:ring-2 focus:ring-[#c67605] bg-white/50"
                 onChange={(e) => handleInputChange('name', e.target.value)}
               />
@@ -103,6 +104,7 @@ const Login: React.FC = () => {
               type="email"
               required
               placeholder="name@email.com"
+              value={formData.email}
               className="w-full px-5 py-3 rounded-2xl border border-yellow-200 outline-none focus:ring-2 focus:ring-[#c67605] bg-white/50"
               onChange={(e) => handleInputChange('email', e.target.value)}
             />
