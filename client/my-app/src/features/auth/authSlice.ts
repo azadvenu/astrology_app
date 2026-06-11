@@ -1,15 +1,33 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginApi } from "../../services/auth.api";
 import { registerApi } from "../../services/auth.api";
+import { jwtDecode } from "jwt-decode";
 
 interface AuthState {
   token: string | null;
   loading: boolean;
   error: string | null;
 }
+const checkTokenValidity = (): string | null => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
 
+
+  try {
+    const decoded :any = jwtDecode(token);
+    const currentTime = Date.now() /1000;
+    if(decoded.exp < currentTime){
+      localStorage.removeItem("token");
+        return null 
+    }
+      return token
+  } catch (error) {
+    localStorage.removeItem("token");
+    return null
+  }
+}
 const initialState: AuthState = {
-  token: localStorage.getItem("token"),
+  token: checkTokenValidity(),
   loading: false,
   error: null,
 };

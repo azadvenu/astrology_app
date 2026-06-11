@@ -1,6 +1,7 @@
 // src/services/api.ts
 import axios from "axios";
-
+import {store} from "../app/store"; // Import your Redux store
+import { logout } from "../features/auth/authSlice";
 const api = axios.create({
   baseURL: "http://localhost:5000/api",
 });
@@ -30,8 +31,8 @@ api.interceptors.response.use(
 
     if (status === 401 && !isAuthPage) {
       console.log("Session expired - logging out");
-
       localStorage.removeItem("token");
+      store.dispatch(logout());
       window.location.href = "/login";
     }
 

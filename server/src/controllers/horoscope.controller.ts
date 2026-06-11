@@ -8,7 +8,7 @@ import axios from "axios";
 
 export const generateHoroscope = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { name, dob, tob, place } = req.body;
-  if (!name || !dob || !tob || !place) {
+  if (!name || !dob || !tob || !place) {  
     res.status(400);
     throw new Error("Please provide name, date, time, and place of birth");
   }

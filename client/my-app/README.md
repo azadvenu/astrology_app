@@ -17,7 +17,7 @@ If you are developing a production application, we recommend updating the config
 
 ```js
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist']),  globalexporsue of think as 
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

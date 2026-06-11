@@ -39,7 +39,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   // If password doesn't match, set status and throw
   if (!isMatch) {
     res.status(401);
-    throw new Error("Invalid email or password");
+      throw new Error("Invalid email or password");
   }
 
   // Ensure secret exists
